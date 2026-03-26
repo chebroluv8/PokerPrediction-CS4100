@@ -68,30 +68,33 @@ def Q_learning(num_hands = 1000, gamma = 0.9, epsilon = 1, decay_rate = 0.999):
             # Get a new observation, reward, done using the env.step() function
             next_state_raw, next_player_id, done = env.step(action)
 
-            # Check if game is done to get reward and update Q-table and num_updates regardless
-            if done:
-                reward = float(env.get_payoffs()[player_id])
-                total_reward += reward
-                next_state = None
+            # Only learn from Player 0 -> Check if game is done to get reward and update Q-table and num_updates regardless
+            if player_id == 0:
+                if done:
+                    reward = float(env.get_payoffs()[player_id])
+                    total_reward += reward
+                    next_state = None
 
-                eta = 1 / (1 + num_updates[current_state][action])
-                Q_table[current_state][action] = ((1 - eta) * Q_table[current_state][action]) + (eta * reward)
+                    eta = 1 / (1 + num_updates[current_state][action])
+                    Q_table[current_state][action] = ((1 - eta) * Q_table[current_state][action]) + (eta * reward)
 
-                num_updates[current_state][action] += 1
+                    num_updates[current_state][action] += 1
 
-            else:
-                reward = 0
-                next_state = encode_state(next_state_raw, next_player_id)
+                else:
+                    reward = 0
+                    next_state = encode_state(next_state_raw, next_player_id)
 
-                if next_state not in Q_table:
-                    Q_table[next_state] = np.zeros(env.num_actions) 
-                    num_updates[next_state] = np.zeros(env.num_actions)
+                    if next_state not in Q_table:
+                        Q_table[next_state] = np.zeros(env.num_actions) 
+                        num_updates[next_state] = np.zeros(env.num_actions)
 
-                eta = 1 / (1 + num_updates[current_state][action])
-                V = np.max(Q_table[next_state])
-                Q_table[current_state][action] = ((1 - eta) * Q_table[current_state][action]) + (eta * (reward + (gamma * V)))
+                    eta = 1 / (1 + num_updates[current_state][action])
+                    V = np.max(Q_table[next_state])
+                    Q_table[current_state][action] = ((1 - eta) * Q_table[current_state][action]) + (eta * (reward + (gamma * V)))
+                    
+                    num_updates[current_state][action] += 1
                 
-                num_updates[current_state][action] += 1
+            state, player_id = next_state_raw, next_player_id
 
         # Add episode reward and decay epsilon at end of episode
         reward_list.append(total_reward)
