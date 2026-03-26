@@ -82,7 +82,7 @@ def Q_learning(num_hands = 1000, gamma = 0.9, epsilon = 1, decay_rate = 0.999):
 
                 else:
                     reward = 0
-                    next_state = encode_state(next_state_raw, next_player_id)
+                    next_state = encode_state(next_state_raw, 0)
 
                     if next_state not in Q_table:
                         Q_table[next_state] = np.zeros(env.num_actions) 
@@ -106,16 +106,15 @@ def Q_learning(num_hands = 1000, gamma = 0.9, epsilon = 1, decay_rate = 0.999):
 """
 Specify number of episodes and decay rate for training and evaluation.
 """
-num_hands = 100000
+num_hands = 1000000
 decay_rate = 0.99999
 
 """
 Run training if train_flag is set
 """
 if train_flag:
-	Q_table = Q_learning(num_hands=num_hands, gamma=0.9, epsilon=1, decay_rate=decay_rate) # Run Q-learning
-
-	# Save the Q-table dict to a file
+	Q_table = Q_learning(num_hands=num_hands, gamma=0.9, epsilon=1, decay_rate=decay_rate) 
+     
 	with open('Q_table_'+str(num_hands)+'_'+str(decay_rate)+'.pickle', 'wb') as handle:
 		pickle.dump(Q_table, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
