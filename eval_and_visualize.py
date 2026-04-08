@@ -11,14 +11,14 @@ os.makedirs("results", exist_ok=True)
 
 STREETS = ["Preflop", "Flop", "Turn", "River"]
 HAND_BUCKETS = ["Weak", "Mediocre", "Strong"]
-ACTION_NAMES = ["Call/Check", "Raise", "Fold"]
+ACTION_NAMES = ["Call", "Raise", "Fold", "Check"]
 
 def evaluate(Q_table, eval_hands=500):
     env = LimitHoldEmEnv()
     eval_rewards = []
     eval_metrics = []
  
-    situation_actions = {(s, h): np.zeros(3) for s in range(4) for h in range(3)}
+    situation_actions = {(s, h): np.zeros(env.num_actions) for s in range(4) for h in range(3)}
     total_actions = 0
  
     for i in range(eval_hands):
@@ -39,8 +39,7 @@ def evaluate(Q_table, eval_hands=500):
                     action = random.choice(legal_actions)
 
                 street, hand_bucket = current_state[0], current_state[1]
-                if action < 3:
-                    situation_actions[(street, hand_bucket)][action] += 1
+                situation_actions[(street, hand_bucket)][action] += 1
 
             else:
                 action = random.choice(legal_actions)

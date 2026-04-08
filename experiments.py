@@ -40,7 +40,7 @@ for gamma, decay_rate, num_hands in itertools.product(gammas, decay_rates, num_h
     print(f"Saved Q-Table and Metrics for gamma={gamma}, decay_rate={decay_rate}, num_hands={num_hands}")
 
     # Evaluate Q-Table Performance
-    eval_metrics, summary = evaluate(Q_table, eval_hands = 500)
+    eval_metrics, summary, situation_actions = evaluate(Q_table, eval_hands = 500)
 
     # Save Evaluation Summary Metrics
     results.append({"gamma": gamma, 
