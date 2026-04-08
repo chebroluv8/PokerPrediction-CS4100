@@ -15,7 +15,7 @@ os.makedirs("results", exist_ok=True)
 os.makedirs("pickle_files", exist_ok=True)
 
 
-gammas = [0.7, 0.8, 0.9, 0.99]
+gammas = [0.7, 0.8, 0.9, 0.95]
 decay_rates = [0.999, 0.9999, 0.99999, 0.999995]
 num_hands = [10000, 100000, 1000000]
 

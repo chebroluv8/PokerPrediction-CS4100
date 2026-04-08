@@ -100,7 +100,7 @@ def Q_learning(num_hands = 1000, gamma = 0.9, epsilon = 1, decay_rate = 0.999, w
         # Add episode reward and decay epsilon at end of episode
         reward_list.append(total_reward)
         epsilon *= decay_rate
-        
+
         # Track rolling average of reward and win rate
         if (i + 1) % window == 0:
             window_rewards = reward_list[-window:]
@@ -109,28 +109,3 @@ def Q_learning(num_hands = 1000, gamma = 0.9, epsilon = 1, decay_rate = 0.999, w
             metrics.append({"hand": i + 1, "avg_reward": avg_reward, "win_rate": win_rate})
     
     return Q_table, metrics
-
-# """
-# Specify number of episodes and decay rate for training and evaluation.
-# """
-# num_hands = 1000000
-# decay_rate = 0.99999
-
-# """
-# Run training if train_flag is set
-# """
-# if train_flag:
-#     Q_table, metrics = Q_learning(num_hands=num_hands, gamma=0.9, epsilon=1, decay_rate=decay_rate, window=500) 
-
-#     with open(f"Q_table_{num_hands}_{decay_rate}.pickle", "wb") as f:
-#         pickle.dump(Q_table, f, protocol=pickle.HIGHEST_PROTOCOL)
- 
-#     with open("training_metrics.csv", "w", newline="") as f:
-#         writer = csv.DictWriter(f, fieldnames=["hand", "avg_reward", "win_rate"])
-#         writer.writeheader()
-#         writer.writerows(metrics)
- 
-#     print("\nMetrics saved to training_metrics.csv")
-#     print(f"\n{'hand':<10} {'avg_reward':<14} {'win_rate':<10}")
-#     for m in metrics:
-#         print(f"{m['hand']:<10} {m['avg_reward']:<14} {m['win_rate']:<10}")
