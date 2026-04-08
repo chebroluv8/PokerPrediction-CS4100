@@ -5,28 +5,43 @@ import random
 import csv
 import os
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 os.makedirs("results", exist_ok=True)
+
+STREETS = ["Preflop", "Flop", "Turn", "River"]
+HAND_BUCKETS = ["Weak", "Mediocre", "Strong"]
+ACTION_NAMES = ["Call/Check", "Raise", "Fold"]
 
 def evaluate(Q_table, eval_hands=500):
     env = LimitHoldEmEnv()
     eval_rewards = []
     eval_metrics = []
-
+ 
+    situation_actions = {(s, h): np.zeros(3) for s in range(4) for h in range(3)}
+    total_actions = 0
+ 
     for i in range(eval_hands):
         state, player_id = env.reset()
         total_reward = 0
         done = False
-
+ 
         while not done:
             current_state = encode_state(state, player_id)
             legal_actions = list(state["legal_actions"].keys())
 
             if player_id == 0:
+                total_actions += 1
+
                 if current_state in Q_table:
                     action = np.argmax(Q_table[current_state])
                 else:
                     action = random.choice(legal_actions)
+
+                street, hand_bucket = current_state[0], current_state[1]
+                if action < 3:
+                    situation_actions[(street, hand_bucket)][action] += 1
+
             else:
                 action = random.choice(legal_actions)
 
@@ -40,16 +55,16 @@ def evaluate(Q_table, eval_hands=500):
         if (i + 1) % 50 == 0:
             window_rewards = eval_rewards[-50:]
             eval_metrics.append({"hand": i + 1, "avg_reward": round(np.mean(window_rewards), 4), "win_rate": round(sum(r > 0 for r in window_rewards) / 50, 4)})
-
+ 
     summary = {
         "avg_reward": round(np.mean(eval_rewards), 4),
         "win_rate": round(sum(r > 0 for r in eval_rewards) / eval_hands, 4),
         "avg_loss": round(np.mean([r for r in eval_rewards if r < 0] or [0]), 4),
         "avg_win": round(np.mean([r for r in eval_rewards if r > 0] or [0]), 4),
-        "total_hands": eval_hands
+        "total_hands": eval_hands,
     }
-
-    return eval_metrics, summary
+ 
+    return eval_metrics, summary, situation_actions
 
 def evaluate_random(eval_hands=500):
     env = LimitHoldEmEnv()
@@ -140,20 +155,64 @@ def plot_comparison_table(q_summary, random_summary, label=""):
     plt.savefig(filename, dpi=150, bbox_inches="tight")
     plt.close()
 
+def plot_situation_heatmap(situation_actions, label=""):
+    """
+    Heatmap of normalized action distributions across every
+    (street, hand_bucket) situation encountered during evaluation.
+    Rows = street x hand_bucket combinations, Columns = actions.
+    """
+    row_labels = []
+    matrix = []
+ 
+    for situation in range(4):
+        for hand_bucket in range(3):
+            counts = situation_actions[(situation, hand_bucket)]
+            total = counts.sum()
+            if total == 0:
+                continue
+            row_labels.append(f"{STREETS[situation]} / {HAND_BUCKETS[hand_bucket]}")
+            matrix.append(counts / total)
+ 
+    if not matrix:
+        return
+ 
+    sns.heatmap(np.array(matrix), annot=True, fmt = ".2f", cmap = "magma", 
+                xticklabels=ACTION_NAMES, yticklabels=row_labels, cbar_kws={"label": "Proportion of Actions"})
+
+    plt.xlabel("Action")
+    plt.ylabel("Situation (Street / Hand Strength)")
+    plt.title('Normalized Distribution of Actions by Situation')
+ 
+    plt.tight_layout()
+    filename = f"results/situation_heatmap_{label}.png" if label else "results/situation_heatmap.png"
+    plt.savefig(filename, dpi=300, bbox_inches="tight")
+    plt.close()
 
 def run_eval(Q_table, label="", eval_hands=500):
-    print(f"Evaluating Q-Learning agent ({label})")
-    eval_metrics, q_summary = evaluate(Q_table, eval_hands=eval_hands)
-
-    print(f"Evaluating random agent baseline")
+    print(f"Evaluating Q-Learning agent ({label})...")
+    eval_metrics, q_summary, situation_actions = evaluate(Q_table, eval_hands=eval_hands)
+ 
+    print(f"Evaluating random agent baseline...")
     random_summary = evaluate_random(eval_hands=eval_hands)
 
     print(f"\n{'Metric':<15} {'Q-Learning':<15} {'Random':<10}")
     for key in ["avg_reward", "win_rate", "avg_win", "avg_loss"]:
         print(f"{key:<15} {str(q_summary[key]):<15} {str(random_summary[key]):<10}")
-
+ 
     save_eval_metrics_csv(eval_metrics, label=label)
     plot_eval_curves(eval_metrics, label=label)
     plot_comparison_table(q_summary, random_summary, label=label)
-
-    return eval_metrics, q_summary, random_summary
+    plot_situation_heatmap(situation_actions, label=label)
+ 
+    comparison = {
+        "label": label,
+        "q_avg_reward": q_summary["avg_reward"],
+        "q_win_rate": q_summary["win_rate"],
+        "q_avg_win": q_summary["avg_win"],
+        "q_avg_loss": q_summary["avg_loss"],
+        "random_avg_reward": random_summary["avg_reward"],
+        "random_win_rate": random_summary["win_rate"],
+        "advantage": round(q_summary["avg_reward"] - random_summary["avg_reward"], 4),
+    }
+ 
+    return eval_metrics, q_summary, random_summary, comparison

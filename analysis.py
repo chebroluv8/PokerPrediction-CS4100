@@ -1,44 +1,31 @@
 """
-Analyzing Evaluation Plots & Comparing to Random Agent
+Analyse Evaluation Results for Specific Q-Learning Configurations and Compare to Random Agent
 """
 
 import pandas as pd
 import pickle
-from eval_and_visualize import evaluate, evaluate_random
+from eval_and_visualize import evaluate, evaluate_random, run_eval
 
 # Load experiment results
 df = pd.read_csv("experiment_results.csv")
 
-# Print best models by average reward
-df = df.sort_values(by = "avg_reward", ascending = False)
+# Print best models by average reward or win rate
+df = df.sort_values(by = "win_rate", ascending = False)
 print("Top Models by Average Reward:")
 print(df)
 
-
+# Return visualizations for top two Q-learning hyperparameters by win rate
+filtered_df = df[:2]
 comparative_results = []
-random_summary = evaluate_random(eval_hands=1000)
 
-for _, row in df.iterrows():
-    label = row["label"]
-    model_path = f"models/{label}.pickle"
+for _, row in filtered_df.iterrows():
+    model_path = f"pickle_files/Q_table_{int(row['train_hands'])}_{row['gamma']}_{row['decay_rate']}.pickle"
 
-    # Load model
     with open(model_path, "rb") as f:
         Q_table = pickle.load(f)
-
-    # Evaluate Q-learning agent
-    eval_metrics, q_summary = evaluate(Q_table, eval_hands=1000)
-
-    # Store comparison
-    comparative_results.append({
-        "label": label,
-        "q_avg_reward": q_summary["avg_reward"],
-        "q_win_rate": q_summary["win_rate"],
-        "random_avg_reward": random_summary["avg_reward"],
-        "random_win_rate": random_summary["win_rate"],
-        "advantage": q_summary["avg_reward"] - random_summary["avg_reward"]})
-
-    # NEED TO ADD VISUALIZATIONS & MORE COMPARISON ANALYSIS
+    
+    eval_metrics, q_summary, random_summary, comparison = run_eval(Q_table, label = f"Top_Win_{row['train_hands']}_{row['gamma']}_{row['decay_rate']}", eval_hands=1000)
+    comparative_results.append(comparison)
 
 # Save and print comparative results
 comparison_df = pd.DataFrame(comparative_results)
