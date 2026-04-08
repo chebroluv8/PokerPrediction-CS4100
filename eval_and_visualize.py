@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 
 os.makedirs("results", exist_ok=True)
 
-
 def evaluate(Q_table, eval_hands=500):
     env = LimitHoldEmEnv()
     eval_rewards = []
@@ -24,11 +23,10 @@ def evaluate(Q_table, eval_hands=500):
             legal_actions = list(state["legal_actions"].keys())
 
             if player_id == 0:
-                action = (
-                    np.argmax(Q_table[current_state])
-                    if current_state in Q_table
-                    else random.choice(legal_actions)
-                )
+                if current_state in Q_table:
+                    action = np.argmax(Q_table[current_state])
+                else:
+                    action = random.choice(legal_actions)
             else:
                 action = random.choice(legal_actions)
 
@@ -41,28 +39,23 @@ def evaluate(Q_table, eval_hands=500):
 
         if (i + 1) % 50 == 0:
             window_rewards = eval_rewards[-50:]
-            eval_metrics.append({
-                "hand": i + 1,
-                "avg_reward": round(np.mean(window_rewards), 4),
-                "win_rate": round(sum(r > 0 for r in window_rewards) / 50, 4),
-            })
+            eval_metrics.append({"hand": i + 1, "avg_reward": round(np.mean(window_rewards), 4), "win_rate": round(sum(r > 0 for r in window_rewards) / 50, 4)})
 
     summary = {
         "avg_reward": round(np.mean(eval_rewards), 4),
         "win_rate": round(sum(r > 0 for r in eval_rewards) / eval_hands, 4),
         "avg_loss": round(np.mean([r for r in eval_rewards if r < 0] or [0]), 4),
         "avg_win": round(np.mean([r for r in eval_rewards if r > 0] or [0]), 4),
-        "total_hands": eval_hands,
+        "total_hands": eval_hands
     }
 
     return eval_metrics, summary
-
 
 def evaluate_random(eval_hands=500):
     env = LimitHoldEmEnv()
     eval_rewards = []
 
-    for _ in range(eval_hands):
+    for i in range(eval_hands):
         state, player_id = env.reset()
         total_reward = 0
         done = False
@@ -91,7 +84,6 @@ def save_eval_metrics_csv(eval_metrics, label=""):
         writer = csv.DictWriter(f, fieldnames=["hand", "avg_reward", "win_rate"])
         writer.writeheader()
         writer.writerows(eval_metrics)
-    print(f"✓ Saved {filename}")
 
 
 def plot_eval_curves(eval_metrics, label=""):
@@ -119,7 +111,6 @@ def plot_eval_curves(eval_metrics, label=""):
     filename = f"results/eval_curves_{label}.png" if label else "results/eval_curves.png"
     plt.savefig(filename, dpi=150)
     plt.close()
-    print(f"✓ Saved {filename}")
 
 
 def plot_comparison_table(q_summary, random_summary, label=""):
@@ -148,18 +139,16 @@ def plot_comparison_table(q_summary, random_summary, label=""):
     filename = f"results/comparison_table_{label}.png" if label else "results/comparison_table.png"
     plt.savefig(filename, dpi=150, bbox_inches="tight")
     plt.close()
-    print(f"✓ Saved {filename}")
 
 
 def run_eval(Q_table, label="", eval_hands=500):
-    print(f"\nEvaluating Q-Learning agent ({label})...")
+    print(f"Evaluating Q-Learning agent ({label})")
     eval_metrics, q_summary = evaluate(Q_table, eval_hands=eval_hands)
 
-    print(f"Evaluating random agent baseline...")
+    print(f"Evaluating random agent baseline")
     random_summary = evaluate_random(eval_hands=eval_hands)
 
     print(f"\n{'Metric':<15} {'Q-Learning':<15} {'Random':<10}")
-    print("-" * 42)
     for key in ["avg_reward", "win_rate", "avg_win", "avg_loss"]:
         print(f"{key:<15} {str(q_summary[key]):<15} {str(random_summary[key]):<10}")
 

@@ -8,8 +8,7 @@ import time
 import pickle
 from tqdm import tqdm
 import random
-
-train_flag = 'train' in sys.argv
+import csv
 
 env = LimitHoldEmEnv()
 
@@ -30,13 +29,14 @@ def encode_state(state, player_id):
 
     return (street, hand_bucket, my_chips, opponent_chips, raises_so_far)
 
-def Q_learning(num_hands = 1000, gamma = 0.9, epsilon = 1, decay_rate = 0.999):
+def Q_learning(num_hands = 1000, gamma = 0.9, epsilon = 1, decay_rate = 0.999, window = 500):
     """
     Parameters:
     - num_hands (int): Number of hands to train on
     - gamma (float): Discount factor
     - epsilon (float): Exploration rate
     - decay_rate (float): Rate at which epsilon decays after each episode
+    - window (int): Number of hands to consider at a time when calculating rolling average
 
     Does: Run Q-learning algorithm for a specified number of hands
     Returns: Q_table (dict) containing the Q-values for each state-action pair 
@@ -44,6 +44,7 @@ def Q_learning(num_hands = 1000, gamma = 0.9, epsilon = 1, decay_rate = 0.999):
     Q_table = {}
     num_updates = {}
     reward_list = []
+    metrics = []
 
     for i in range(num_hands):
         state, player_id = env.reset()
@@ -99,23 +100,37 @@ def Q_learning(num_hands = 1000, gamma = 0.9, epsilon = 1, decay_rate = 0.999):
         # Add episode reward and decay epsilon at end of episode
         reward_list.append(total_reward)
         epsilon *= decay_rate
+        
+        # Track rolling average of reward and win rate
+        if (i + 1) % window == 0:
+            window_rewards = reward_list[-window:]
+            avg_reward = round(np.mean(window_rewards), 4)
+            win_rate = round(sum(r > 0 for r in window_rewards) / window, 4)
+            metrics.append({"hand": i + 1, "avg_reward": avg_reward, "win_rate": win_rate})
     
-    print(np.average(reward_list))
-    return Q_table
+    return Q_table, metrics
 
-"""
-Specify number of episodes and decay rate for training and evaluation.
-"""
-num_hands = 1000000
-decay_rate = 0.99999
+# """
+# Specify number of episodes and decay rate for training and evaluation.
+# """
+# num_hands = 1000000
+# decay_rate = 0.99999
 
-"""
-Run training if train_flag is set
-"""
-if train_flag:
-	Q_table = Q_learning(num_hands=num_hands, gamma=0.9, epsilon=1, decay_rate=decay_rate) 
-     
-	with open('Q_table_'+str(num_hands)+'_'+str(decay_rate)+'.pickle', 'wb') as handle:
-		pickle.dump(Q_table, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# """
+# Run training if train_flag is set
+# """
+# if train_flag:
+#     Q_table, metrics = Q_learning(num_hands=num_hands, gamma=0.9, epsilon=1, decay_rate=decay_rate, window=500) 
 
-
+#     with open(f"Q_table_{num_hands}_{decay_rate}.pickle", "wb") as f:
+#         pickle.dump(Q_table, f, protocol=pickle.HIGHEST_PROTOCOL)
+ 
+#     with open("training_metrics.csv", "w", newline="") as f:
+#         writer = csv.DictWriter(f, fieldnames=["hand", "avg_reward", "win_rate"])
+#         writer.writeheader()
+#         writer.writerows(metrics)
+ 
+#     print("\nMetrics saved to training_metrics.csv")
+#     print(f"\n{'hand':<10} {'avg_reward':<14} {'win_rate':<10}")
+#     for m in metrics:
+#         print(f"{m['hand']:<10} {m['avg_reward']:<14} {m['win_rate']:<10}")

@@ -1,78 +1,63 @@
-from Q_learning import Q_learning, encode_state
-from poker_rlcard import LimitHoldEmEnv
-import numpy as np
-import random
+"""
+Run Training Experiments, Save Pickle Files, and Collect Initial Evaluation Metrics 
+"""
+
+from Q_learning import Q_learning
+from eval_and_visualize import evaluate, save_eval_metrics_csv
 import csv
 import itertools
+import pickle
+import os
+import pandas as pd
 
-gammas      = [0.7, 0.9, 0.99]
-decay_rates = [0.999, 0.9999, 0.99999]
-num_hands   = 10000
+os.makedirs("training_metrics", exist_ok=True)
+os.makedirs("results", exist_ok=True)
+os.makedirs("pickle_files", exist_ok=True)
+
+
+gammas = [0.7, 0.8, 0.9, 0.99]
+decay_rates = [0.999, 0.9999, 0.99999, 0.999995]
+num_hands = [10000, 100000, 1000000]
 
 results = []
 
-for gamma, decay_rate in itertools.product(gammas, decay_rates):
-    print(f"Running experiment: gamma={gamma}, decay_rate={decay_rate} ...")
+for gamma, decay_rate, num_hands in itertools.product(gammas, decay_rates, num_hands):
 
-    Q_table = Q_learning(
-        num_hands=num_hands,
-        gamma=gamma,
-        epsilon=1,
-        decay_rate=decay_rate
-    )
+    # Train & Build Q-Table
+    print(f"Running experiment: gamma={gamma}, decay_rate={decay_rate}, num_hands={num_hands}")
+    Q_table, metrics = Q_learning(num_hands=num_hands, gamma=gamma, epsilon=1, decay_rate=decay_rate)
 
-    env = LimitHoldEmEnv()
-    eval_hands = 500
-    eval_rewards = []
+    # Save Q-Table in Pickle File
+    with open(f"pickle_files/Q_table_{num_hands}_{gamma}_{decay_rate}.pickle", "wb") as f:
+        pickle.dump(Q_table, f, protocol=pickle.HIGHEST_PROTOCOL)
+ 
+    # Save Training Metrics
+    with open(f"training_metrics/training_metrics_{num_hands}_{gamma}_{decay_rate}.csv", "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["hand", "avg_reward", "win_rate"])
+        writer.writeheader()
+        writer.writerows(metrics)
+    
+    print(f"Saved Q-Table and Metrics for gamma={gamma}, decay_rate={decay_rate}, num_hands={num_hands}")
 
-    for _ in range(eval_hands):
-        state, player_id = env.reset()
-        total_reward = 0
-        done = False
+    # Evaluate Q-Table Performance
+    eval_metrics, summary = evaluate(Q_table, eval_hands = 500)
 
-        while not done:
-            current_state = encode_state(state, player_id)
-            legal_actions = list(state["legal_actions"].keys())
+    # Save Evaluation Summary Metrics
+    results.append({"gamma": gamma, 
+                    "decay_rate": decay_rate, 
+                    "train_hands": num_hands,
+                    "avg_reward": summary["avg_reward"],
+                    "win_rate": summary["win_rate"],
+                    "avg_loss": summary["avg_loss"],
+                    "avg_win": summary["avg_win"],
+                    "eval_hands": summary["total_hands"]})
 
-            if player_id == 0:
-                if current_state in Q_table:
-                    action = np.argmax(Q_table[current_state])
-                else:
-                    action = random.choice(legal_actions)
-            else:
-                action = random.choice(legal_actions)
+    # Save Windowed Evaluation Metrics
+    save_eval_metrics_csv(eval_metrics, label = f"{num_hands}_{gamma}_{decay_rate}")
 
-            state, player_id, done = env.step(action)
+    print(f"Saved Evaluation Metrics for gamma={gamma}, decay_rate={decay_rate}, num_hands={num_hands}")
 
-            if done and player_id == 0:
-                total_reward = float(env.get_payoffs()[0])
-
-        eval_rewards.append(total_reward)
-
-    avg_reward = round(np.mean(eval_rewards), 4)
-    win_rate   = round(sum(r > 0 for r in eval_rewards) / eval_hands, 4)
-
-    print(f"  → avg reward: {avg_reward}, win rate: {win_rate}\n")
-
-    results.append({
-        "gamma": gamma,
-        "decay_rate": decay_rate,
-        "num_hands": num_hands,
-        "avg_reward": avg_reward,
-        "win_rate": win_rate
-    })
-
-csv_file = "experiment_results.csv"
-fieldnames = ["gamma", "decay_rate", "num_hands", "avg_reward", "win_rate"]
-
-with open(csv_file, "w", newline="") as f:
-    writer = csv.DictWriter(f, fieldnames=fieldnames)
-    writer.writeheader()
-    writer.writerows(results)
-
-print(f"Results saved to {csv_file}")
-
-print(f"\n{'gamma':<8} {'decay_rate':<12} {'avg_reward':<12} {'win_rate':<10}")
-print("-" * 45)
-for r in sorted(results, key=lambda x: x["avg_reward"], reverse=True):
-    print(f"{r['gamma']:<8} {r['decay_rate']:<12} {r['avg_reward']:<12} {r['win_rate']:<10}")
+# Print and save Evaluation Metrics into CSV
+eval_results = pd.DataFrame(results)
+eval_results.to_csv("experiment_results.csv", index=False)
+print(eval_results)
