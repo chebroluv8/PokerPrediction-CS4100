@@ -18,7 +18,7 @@ def evaluate(Q_table, eval_hands=500):
     eval_rewards = []
     eval_metrics = []
  
-    situation_actions = {(s, h): np.zeros(env.num_actions) for s in range(4) for h in range(3)}
+    situation_actions = {(street, hb): np.zeros(env.num_actions) for street in range(4) for hb in range(3)}
     total_actions = 0
  
     for i in range(eval_hands):
@@ -126,7 +126,6 @@ def plot_eval_curves(eval_metrics, label=""):
     plt.savefig(filename, dpi=150)
     plt.close()
 
-
 def plot_comparison_table(q_summary, random_summary, label=""):
     metrics = ["avg_reward", "win_rate", "avg_win", "avg_loss"]
     q_vals = [q_summary[m] for m in metrics]
@@ -155,25 +154,15 @@ def plot_comparison_table(q_summary, random_summary, label=""):
     plt.close()
 
 def plot_situation_heatmap(situation_actions, label=""):
-    """
-    Heatmap of normalized action distributions across every
-    (street, hand_bucket) situation encountered during evaluation.
-    Rows = street x hand_bucket combinations, Columns = actions.
-    """
     row_labels = []
     matrix = []
  
-    for situation in range(4):
+    for street in range(4):
         for hand_bucket in range(3):
-            counts = situation_actions[(situation, hand_bucket)]
+            counts = situation_actions[(street, hand_bucket)]
             total = counts.sum()
-            if total == 0:
-                continue
-            row_labels.append(f"{STREETS[situation]} / {HAND_BUCKETS[hand_bucket]}")
+            row_labels.append(f"{STREETS[street]} / {HAND_BUCKETS[hand_bucket]}")
             matrix.append(counts / total)
- 
-    if not matrix:
-        return
  
     sns.heatmap(np.array(matrix), annot=True, fmt = ".2f", cmap = "magma", 
                 xticklabels=ACTION_NAMES, yticklabels=row_labels, cbar_kws={"label": "Proportion of Actions"})
@@ -183,7 +172,7 @@ def plot_situation_heatmap(situation_actions, label=""):
     plt.title('Normalized Distribution of Actions by Situation')
  
     plt.tight_layout()
-    filename = f"results/situation_heatmap_{label}.png" if label else "results/situation_heatmap.png"
+    filename = f"results/situation_heatmap_{label}.png" 
     plt.savefig(filename, dpi=300, bbox_inches="tight")
     plt.close()
 
