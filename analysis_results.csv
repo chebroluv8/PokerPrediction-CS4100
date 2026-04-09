@@ -1,3 +1,4 @@
-label,q_avg_reward,q_win_rate,q_avg_win,q_avg_loss,random_avg_reward,random_win_rate,advantage
-Top_Win_1000000.0_0.95_0.999,1.327,0.916,1.9902,-6.4416,0.075,0.507,1.252
-Top_Win_100000.0_0.7_0.999,1.2995,0.916,1.9481,-5.8434,0.066,0.524,1.2335
+label,q_avg_reward,q_win_rate,q_avg_win,q_avg_loss,random_avg_reward,random_win_rate,advantage,wr_improvement,avg_improvement
+Top_100000_0.7_0.999,1.3605,0.924,1.9389,-5.9041,-0.1425,0.472,1.503,0.452,1.503
+Top_100000_0.8_0.99999,1.5005,0.936,1.9439,-5.4068,-0.067,0.501,1.5675,0.435,1.5675
+Top_1000000_0.8_0.999995,1.2365,0.92,1.8505,-5.9744,0.059,0.503,1.1775,0.417,1.1775
