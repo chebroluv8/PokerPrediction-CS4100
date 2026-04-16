@@ -1,6 +1,3 @@
-"""
-State Encoding & Q-Learning Algorithm
-"""
 from poker_rlcard import LimitHoldEmEnv
 import numpy as np
 import sys

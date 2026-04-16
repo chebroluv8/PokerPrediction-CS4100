@@ -1,6 +1,5 @@
 """
-Interactive Terminal UI — Watch Q-Learning Agent vs Random Agent
-Run: python play.py
+Interactive Terminal UI (Watch Q-Learning Agent vs Random Agent)
 """
 
 import pickle
@@ -11,11 +10,11 @@ import os
 from poker_rlcard import LimitHoldEmEnv
 from Q_learning import encode_state
 
-STREETS      = {0: "Preflop", 1: "Flop", 2: "Turn", 3: "River"}
+STREETS = {0: "Preflop", 1: "Flop", 2: "Turn", 3: "River"}
 HAND_BUCKETS = {0: "Weak", 1: "Mediocre", 2: "Strong"}
 ACTION_NAMES = {0: "Call", 1: "Raise", 2: "Fold", 3: "Check"}
 ACTION_EMOJI = {0: "📞", 1: "📈", 2: "🏳️ ", 3: "✅"}
-WIDTH        = 60
+WIDTH = 60
 
 def clear(): os.system("clear" if os.name == "posix" else "cls")
 
@@ -96,13 +95,13 @@ def play_hand(Q_table, hand_num):
         raw = state["raw_obs"]
         legal = list(state["legal_actions"].keys())
 
-        street_idx   = env.get_street(raw["public_cards"])
-        hand_bucket  = env.get_hand_strength_bucket(raw["hand"])
-        street_name  = STREETS[street_idx]
-        bucket_name  = HAND_BUCKETS[hand_bucket]
+        street_idx = env.get_street(raw["public_cards"])
+        hand_bucket = env.get_hand_strength_bucket(raw["hand"])
+        street_name = STREETS[street_idx]
+        bucket_name = HAND_BUCKETS[hand_bucket]
 
         is_agent = (player_id == 0)
-        actor    = "🤖 Q-Agent (P0)" if is_agent else "🎲 Random  (P1)"
+        actor = "🤖 Q-Agent (P0)" if is_agent else "🎲 Random  (P1)"
 
         separator(street_name)
         info_lines = [
@@ -158,9 +157,9 @@ def run_session(Q_table):
         rewards.append(reward)
         hand_num += 1
 
-        wins    = sum(r > 0 for r in rewards)
+        wins = sum(r > 0 for r in rewards)
         win_pct = wins / len(rewards) * 100
-        avg_r   = np.mean(rewards)
+        avg_r = np.mean(rewards)
 
         separator("SESSION STATS")
         print(f"  Hands played : {len(rewards)}")

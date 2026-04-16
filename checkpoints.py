@@ -67,10 +67,4 @@ def Q_learning_with_checkpoints(num_hands=10000, gamma=0.99, epsilon=1, decay_ra
     return Q_table
 
 
-Q_table = Q_learning_with_checkpoints(
-    num_hands=10000,
-    gamma=0.99,
-    epsilon=1,
-    decay_rate=0.9999,
-    checkpoint_every=2000
-)
+Q_table = Q_learning_with_checkpoints(num_hands=10000, gamma=0.99, epsilon=1, decay_rate=0.9999, checkpoint_every=2000)
