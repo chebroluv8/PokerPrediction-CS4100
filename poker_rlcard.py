@@ -1,6 +1,3 @@
-"""
-Define Poker Environment
-"""
 import rlcard 
 import random
 
@@ -29,13 +26,14 @@ class LimitHoldEmEnv():
         Returns: Integer representation of street (0 - preflop, 3 - flop, 4 - turn, 5 - river)
         """
         if len(public_cards) == 0:
-            return 0   # preflop
+            return 0  
         elif len(public_cards) == 3:
-            return 1   # flop
+            return 1   
+
         elif len(public_cards) == 4:
-            return 2   # turn
+            return 2   
         else:
-            return 3   # river
+            return 3  
 
     def get_hand_strength_bucket(self, hand):
         """
