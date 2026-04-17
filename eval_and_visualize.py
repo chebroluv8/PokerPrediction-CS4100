@@ -158,17 +158,17 @@ def plot_comparison_table(q_summary, random_summary, label=""):
     q_vals = [q_summary[m] for m in metrics]
     r_vals = [random_summary[m] for m in metrics]
 
-    fig, ax = plt.subplots(figsize=(8, 3))
-    ax.axis("off")
+    plt.figure(figsize=(8, 3))
+    plt.axis("off")
 
     rows = [[m, str(q), str(r)] for m, q, r in zip(metrics, q_vals, r_vals)]
-    table = ax.table(cellText=rows, colLabels=["Metric", "Q-Learning Agent", "Random Agent"], cellLoc="center", loc="center")
+    table = plt.table(cellText=rows, colLabels=["Metric", "Q-Learning Agent", "Random Agent"], cellLoc="center", loc="center")
     table.auto_set_font_size(False)
     table.set_fontsize(11)
     table.scale(1.4, 1.8)
 
     title = f"Q-Learning vs Random Agent — {label}" 
-    fig.suptitle(title, fontsize=12, fontweight="bold")
+    plt.title(title, fontsize=12, fontweight="bold")
 
     plt.tight_layout()
     filename = f"results/comparison_table_{label}.png" 

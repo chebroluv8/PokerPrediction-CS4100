@@ -32,7 +32,8 @@ PokerPrediction-CS4100/
     ├── comparison_table_*.png
     ├── situation_heatmap_*.png
     ├── improvement_by_train_hands.png
-    ├── top10_win_rate_vs_random.png
+    ├── top10_win_rate.png
+    ├── top10_avg_reward.png
     └── eval_metrics_*.csv
 ```
 
@@ -121,12 +122,11 @@ python play.py
 | `decay_rate` | Multiplicative decay applied to epsilon each episode |
 | `window` | Rolling window size for tracking training metrics |
 
-Sweep experiments tested combinations of `num_hands` ∈ {10k, 100k, 1M}, `gamma` ∈ {0.7, 0.8, 0.9, 0.95}, and decay rates ∈ {0.999, 0.9999, 0.99999, 0.999995}. Top configurations achieved **win rates above 92%** against a random agent.
+Sweep experiments tested combinations of `num_hands` in {10k, 100k, 1M}, `gamma` in {0.7, 0.8, 0.9, 0.95}, and decay rates in {0.999, 0.9999, 0.99999, 0.999995}. Top configurations achieved **win rates above 92%** against a random agent.
 
 ---
 
 ## Team
 
-Built for **CS4100 (Artificial Intelligence)** at Northeastern University.
-
-Contributors: Naisha, Anjali, Vaishnavi, Madhav
+Final Project for **CS4100 (Artificial Intelligence)** 
+Contributors: Naisha Mistry, Anjali Silina, Vaishnavi Chebrolu, Madhav Nair

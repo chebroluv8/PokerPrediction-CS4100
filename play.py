@@ -1,7 +1,3 @@
-"""
-Interactive Terminal UI (Watch Q-Learning Agent vs Random Agent)
-"""
-
 import pickle
 import random
 import numpy as np
@@ -18,6 +14,7 @@ WIDTH = 60
 
 def clear(): os.system("clear" if os.name == "posix" else "cls")
 
+# AI Citation - Used AI to help with the formatting/structure of the text UI
 def box(title, lines, width=WIDTH):
     print("╔" + "═" * (width - 2) + "╗")
     t = f"  {title}  "
