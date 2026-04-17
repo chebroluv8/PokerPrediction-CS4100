@@ -1,7 +1,3 @@
-"""
-Run Training Experiments, Save Pickle Files, and Collect Initial Evaluation Metrics 
-"""
-
 from Q_learning import Q_learning
 from eval_and_visualize import evaluate, save_eval_metrics_csv
 import csv
@@ -14,7 +10,7 @@ os.makedirs("training_metrics", exist_ok=True)
 os.makedirs("results", exist_ok=True)
 os.makedirs("pickle_files", exist_ok=True)
 
-
+# Establish hyperparameters to test
 gammas = [0.7, 0.8, 0.9, 0.95]
 decay_rates = [0.999, 0.9999, 0.99999, 0.999995]
 num_hands = [10000, 100000, 1000000]
