@@ -19,7 +19,7 @@ PokerPrediction-CS4100/
 ├── experiments.py                # Runs full hyperparameter sweep, saves Q-tables & eval metrics
 ├── eval_and_visualize.py         # Evaluation functions and plot generation
 ├── agent_comparison_analysis.py  # Sweep analysis & visualizations
-├── checkpoints.py                # Saves Q-table checkpoints during training
+├── checkpoints.py                # Q-learning loop variant that tracks Q-table checkpoints during training
 ├── play.py                       # Play against the trained agent
 ├── data_definition.pdf           # State space feature definitions
 ├── experiment_results.csv        # Aggregated results across all sweep experiments
