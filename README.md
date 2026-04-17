@@ -129,4 +129,5 @@ Sweep experiments tested combinations of `num_hands` in {10k, 100k, 1M}, `gamma`
 ## Team
 
 Final Project for **CS4100 (Artificial Intelligence)** 
+
 Contributors: Naisha Mistry, Anjali Silina, Vaishnavi Chebrolu, Madhav Nair
