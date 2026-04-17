@@ -23,7 +23,7 @@ PokerPrediction-CS4100/
 ├── play.py                       # Play against the trained agent
 ├── data_definition.pdf           # State space feature definitions
 ├── experiment_results.csv        # Aggregated results across all sweep experiments
-├── analysis_results.csv          # Q-agent vs random agent comparison summary
+├── analysis_results.csv          # Q-agent vs random agent comparison summary of best performing models
 ├── pickle_files/                 # Trained Q-tables for all hyperparameter combinations
 ├── training_metrics/             # Per-experiment training metric CSVs
 └── results/                      # Evaluation CSVs and plots
