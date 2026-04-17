@@ -21,7 +21,6 @@ PokerPrediction-CS4100/
 ├── agent_comparison_analysis.py  # Sweep analysis & visualizations
 ├── checkpoints.py                # Saves Q-table checkpoints during training
 ├── play.py                       # Play against the trained agent
-├── env_setup.ipynb               # Environment setup and exploration notebook
 ├── data_definition.pdf           # State space feature definitions
 ├── experiment_results.csv        # Aggregated results across all sweep experiments
 ├── analysis_results.csv          # Q-agent vs random agent comparison summary
